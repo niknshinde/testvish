@@ -75,7 +75,7 @@ def correlate_incidents(p: "SecurityPipeline", window_min: int = 10) -> list[str
     return list(dict.fromkeys(findings))
 
 
-def recommendations(p: "SecurityPipeline", limit: int = 8) -> list[str]:
+def recommendations(p: "SecurityPipeline", limit: int = 10) -> list[str]:
     recs: list[tuple[int, str]] = []
     alerts = p.alerts.alerts
     # 1) cross-event correlations are the highest-value insight

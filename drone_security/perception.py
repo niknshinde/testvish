@@ -2,7 +2,7 @@
 
 Two interchangeable analyzers implement :class:`FrameAnalyzer`:
 
-* :class:`TextFrameAnalyzer` - deterministic, offline, ~20 us/frame. Parses the
+* :class:`TextFrameAnalyzer` - deterministic, offline, ~0.1 ms/frame. Parses the
   simulated frame descriptions ("Blue Ford F150 entering through main gate")
   with a lexicon + span-merging approach. This is the default and is what the
   test-suite exercises.

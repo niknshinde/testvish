@@ -1,0 +1,20 @@
+flowchart TD
+  Q([Owner question]) --> K{ANTHROPIC_API_KEY<br/>and LangChain installed?}
+  K -- yes --> L["LLMSecurityAgent<br/>LangChain create_agent + ChatAnthropic"]
+  K -- no --> O["OfflineSecurityAgent<br/>regex intent router"]
+  SP["System prompt =<br/>role + grounding rules +<br/>bounded memory block"] --> L
+  L --> TC{tool call?}
+  TC -- yes --> T["SecurityTools<br/>(index / tracker / summariser)"]
+  T --> L
+  TC -- no --> A([Grounded answer<br/>with times + frame numbers])
+  L -. "API error" .-> O
+  O --> INT{intent}
+  INT -- summary --> T
+  INT -- alerts / recommendations --> T
+  INT -- "how many times / when did it leave" --> T
+  INT -- time window --> T
+  INT -- object filters --> T
+  INT -- free text --> T
+  O --> A
+  H[("Conversation history<br/>+ last referenced entity")] <--> L
+  H <--> O

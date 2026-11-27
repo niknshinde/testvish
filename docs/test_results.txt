@@ -1,0 +1,74 @@
+tests/test_agent.py::test_what_objects_were_in_the_video
+tests/test_agent.py::test_show_all_truck_events
+tests/test_agent.py::test_how_many_visits_and_follow_up_pronoun
+tests/test_agent.py::test_time_questions
+tests/test_agent.py::test_alert_and_recommendation_questions
+tests/test_agent.py::test_summary_question
+tests/test_agent.py::test_free_text_falls_back_to_hybrid_search
+tests/test_agent.py::test_parse_object_filters
+tests/test_agent.py::test_langchain_agent_calls_tools
+tests/test_agent.py::test_llm_agent_falls_back_offline_on_error
+tests/test_cli.py::test_cli_demo_runs_offline
+tests/test_cli.py::test_cli_query_and_ask
+tests/test_index.py::test_show_all_truck_events
+tests/test_index.py::test_query_by_time_window
+tests/test_index.py::test_query_by_attributes
+tests/test_index.py::test_alert_queries
+tests/test_index.py::test_full_text_search_bm25
+tests/test_index.py::test_semantic_search_handles_synonyms
+tests/test_index.py::test_hybrid_search
+tests/test_index.py::test_embedder_is_normalised_and_deterministic
+tests/test_index.py::test_index_persists_to_disk
+tests/test_perception.py::test_vehicle_make_model_colour
+tests/test_perception.py::test_model_without_noun_infers_make_and_category
+tests/test_perception.py::test_plate_extracted
+tests/test_perception.py::test_person_attributes_and_loitering_action
+tests/test_perception.py::test_multiple_objects_and_zone_carry_over
+tests/test_perception.py::test_suspicious_item_attached_to_person
+tests/test_perception.py::test_quiet_frames_have_no_detections[No activity at garage]
+tests/test_perception.py::test_quiet_frames_have_no_detections[No vehicles at main gate]
+tests/test_perception.py::test_quiet_frames_have_no_detections[Empty driveway]
+tests/test_perception.py::test_quiet_frames_have_no_detections[Parking lot empty]
+tests/test_perception.py::test_quiet_frames_have_no_detections[Garage door closed, no activity]
+tests/test_perception.py::test_animals
+tests/test_perception.py::test_group_of_people
+tests/test_perception.py::test_frame_zone_used_when_text_has_no_landmark
+tests/test_perception.py::test_vlm_payload_mapped_to_detections
+tests/test_perception.py::test_vlm_falls_back_to_text_parser_on_refusal_or_error
+tests/test_pipeline.py::test_truck_logged_correctly
+tests/test_pipeline.py::test_midnight_loitering_alert
+tests/test_pipeline.py::test_expected_alert_set
+tests/test_pipeline.py::test_no_false_alerts_for_authorised_or_wildlife
+tests/test_pipeline.py::test_entities_and_visits
+tests/test_pipeline.py::test_every_frame_indexed
+tests/test_pipeline.py::test_memory_context_is_compact_and_informative
+tests/test_pipeline.py::test_stream_roundtrip
+tests/test_pipeline.py::test_simulation_is_deterministic
+tests/test_rules.py::test_alert_triggered_at_midnight_for_loitering
+tests/test_rules.py::test_no_loitering_alert_for_brief_presence
+tests/test_rules.py::test_no_night_alert_at_noon
+tests/test_rules.py::test_night_activity_in_restricted_zone_is_critical
+tests/test_rules.py::test_perimeter_breach_and_suspicious_object
+tests/test_rules.py::test_repeat_vehicle_alert_on_second_visit_only
+tests/test_rules.py::test_authorised_vehicle_never_alerts
+tests/test_rules.py::test_vehicle_dwell
+tests/test_rules.py::test_unattended_package
+tests/test_rules.py::test_restricted_zone_after_hours
+tests/test_rules.py::test_cooldown_suppresses_duplicates
+tests/test_rules.py::test_low_battery_warning_then_critical
+tests/test_rules.py::test_docked_drone_low_battery_is_fine
+tests/test_rules.py::test_geofence_altitude_wind_and_gap
+tests/test_scalability.py::test_throughput
+tests/test_scalability.py::test_query_latency
+tests/test_scalability.py::test_context_stays_bounded
+tests/test_scalability.py::test_100k_frames_on_disk
+tests/test_summary.py::test_one_sentence_summary
+tests/test_summary.py::test_cross_event_correlation_links_tampering_to_truck
+tests/test_summary.py::test_recommendations_are_prioritised
+tests/test_summary.py::test_empty_summary
+tests/test_tracker.py::test_same_vehicle_same_entity_and_visits_counted
+tests/test_tracker.py::test_different_vehicles_are_different_entities
+tests/test_tracker.py::test_plate_links_sightings_with_and_without_plate
+tests/test_tracker.py::test_person_dwell_time_and_reid_by_clothing
+tests/test_tracker.py::test_find_entities_by_text
+============================= 73 passed in 32.25s ==============================

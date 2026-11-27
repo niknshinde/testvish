@@ -1,0 +1,69 @@
+erDiagram
+  FRAMES ||--o{ DETECTIONS : contains
+  FRAMES ||--|| FRAMES_FTS : "full-text (BM25)"
+  FRAMES ||--|| EMBEDDINGS : "vector"
+  FRAMES ||--o{ LOGS : "context lines"
+  FRAMES ||--o{ ALERTS : "evidence"
+  FRAMES {
+    int frame_id PK
+    text ts
+    real ts_epoch "indexed"
+    text zone "indexed"
+    text description
+    text caption "VLM"
+    text labels
+    real lat
+    real lon
+    real altitude_m
+    real battery_pct
+  }
+  DETECTIONS {
+    int id PK
+    int frame_id FK
+    real ts_epoch
+    text obj_type "indexed"
+    text category "indexed"
+    text color
+    text make
+    text model
+    text plate
+    text action
+    text zone
+    text entity_id "indexed"
+    text attributes "json"
+  }
+  ALERTS {
+    text alert_id PK
+    real ts_epoch
+    text rule_id
+    int severity
+    text message
+    text recommendation
+    text evidence "json frame ids"
+  }
+  LOGS {
+    int id PK
+    real ts_epoch
+    int frame_id
+    text message
+    text entity_id
+  }
+  TELEMETRY {
+    int id PK
+    real ts_epoch
+    real lat
+    real lon
+    real altitude_m
+    real battery_pct
+    real wind_mps
+    text mode
+  }
+  EMBEDDINGS {
+    int frame_id PK
+    blob vec "512-d float32"
+  }
+  FRAMES_FTS {
+    text description
+    text labels
+    text zone
+  }

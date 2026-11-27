@@ -46,8 +46,12 @@ def test_semantic_search_handles_synonyms(day_pipeline):
 
 
 def test_hybrid_search(day_pipeline):
-    rows = day_pipeline.index.hybrid_search("person climbing the fence with a tool", limit=5)
+    idx = day_pipeline.index
+    rows = idx.hybrid_search("person climbing the fence with a tool", limit=5)
     assert rows[0]["frame_id"] in {1372, 1391}
+    # synonym expansion + event prior: ~180 quiet "Tool shed door closed" frames must not drown the real events
+    assert {r["frame_id"] for r in idx.hybrid_search("intruder with a tool", limit=2)} == {1372, 1388}
+    assert all("F150" in r["description"] for r in idx.hybrid_search("pickup at gate", limit=4))
 
 
 def test_embedder_is_normalised_and_deterministic():

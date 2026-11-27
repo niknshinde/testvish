@@ -1,0 +1,39 @@
+flowchart TB
+  subgraph EDGE["Drone dock edge computer (real-time, offline-capable)"]
+    direction LR
+    TEL["Telemetry stream<br/>GPS, altitude, battery, wind, mode"] --> SAF["Safety rules<br/>battery · altitude · geofence · wind · gap"]
+    VID["Video frames<br/>(text descriptions in simulation,<br/>JPEG frames for real video)"] --> GATE["Change-gated sampler<br/>skip near-duplicate frames"]
+    GATE --> PERC{"Perception<br/>FrameAnalyzer"}
+    PERC -- offline --> TXT["TextFrameAnalyzer<br/>lexicon + span merging"]
+    PERC -- VLM --> VLM["ClaudeVisionAnalyzer<br/>JSON-schema output"]
+    TXT --> DET["Detections<br/>type · colour · make/model · plate<br/>action · zone · attributes"]
+    VLM --> DET
+    DET --> TRK["EntityTracker<br/>re-ID · visits · dwell time"]
+    TRK --> SEC["Security rules<br/>loitering · night · breach · repeat vehicle<br/>dwell · package · restricted zone"]
+    SEC --> AM["AlertManager<br/>dedup · cooldown · escalation"]
+    SAF --> AM
+    TRK --> LOG["Context logs<br/>'Blue Ford F150 spotted at garage, 12:00.'"]
+    AM --> SINK["Sinks<br/>console · JSONL · push/webhook"]
+  end
+  subgraph STORE["Frame index (SQLite)"]
+    direction TB
+    T1[("frames + telemetry")]
+    T2[("detections<br/>B-tree indexes")]
+    T3[("FTS5 BM25")]
+    T4[("embeddings<br/>vector search")]
+  end
+  DET --> STORE
+  LOG --> STORE
+  AM --> STORE
+  TRK --> MEM["SecurityMemory<br/>working · episodic (hourly) · semantic (entities, alerts)"]
+  AM --> MEM
+  subgraph AGENT["Security Analyst agent"]
+    LLM["LangChain create_agent<br/>Claude (tool calling)"]
+    OFF["Offline intent router<br/>(fallback / no API key)"]
+    TOOLS["Tools: search_frames · find_object_events · activity_between<br/>list_alerts · entity_history · object_inventory<br/>video_summary · get_recommendations · get_frame"]
+    LLM --> TOOLS
+    OFF --> TOOLS
+  end
+  MEM -- "bounded context (system prompt)" --> LLM
+  TOOLS -- "retrieval" --> STORE
+  USER(["Property owner<br/>questions & follow-ups"]) <--> AGENT

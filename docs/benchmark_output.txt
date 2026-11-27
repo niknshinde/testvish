@@ -1,0 +1,7 @@
+Ingested 50,000 frames (15,196 detections, 2,560 alerts) in 8.84s -> 5,658 frames/s
+Context block size: 14,318 chars (bounded regardless of video length)
+  structured: all trucks          15.07 ms  (2027 rows)
+  time window: 1 hour              1.79 ms  (500 rows)
+  FTS5: 'climbing fence'           3.23 ms  (50 rows)
+  vector: 'intruder'               5.27 ms  (20 rows)
+  hybrid: 'pickup at gate'        27.80 ms  (20 rows)

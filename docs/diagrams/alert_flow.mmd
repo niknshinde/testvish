@@ -1,0 +1,26 @@
+flowchart TD
+  S([Detection + TrackUpdate]) --> P{person?}
+  P -- yes --> N{night 23:00-05:00?}
+  N -- yes --> NR{restricted zone?}
+  NR -- yes --> C1[/CRITICAL night_activity/]
+  NR -- no --> H1[/HIGH night_activity/]
+  N -- no --> RZ{restricted zone and<br/>outside business hours?}
+  RZ -- yes --> H2[/HIGH restricted_zone/]
+  P -- yes --> AC{action climbing<br/>or tampering?}
+  AC -- yes --> C2[/CRITICAL perimeter_breach/]
+  P -- yes --> SO{carrying crowbar / ladder /<br/>mask / weapon?}
+  SO -- yes --> C3[/CRITICAL suspicious_object/]
+  P -- yes --> LO{stationary and dwell >= 60 s<br/>in same zone?}
+  LO -- yes --> H3[/HIGH loitering/]
+  S --> V{vehicle?}
+  V -- yes --> AU{authorised list?<br/>plate or colour+make+model}
+  AU -- yes --> OK([log only])
+  AU -- no --> RV{new visit and<br/>visits today >= 2?}
+  RV -- yes --> M1[/MEDIUM repeat_vehicle/]
+  AU -- no --> VD{parked >= 15 min?}
+  VD -- yes --> M2[/MEDIUM vehicle_dwell/]
+  S --> PK{package dwell >= 30 min?}
+  PK -- yes --> L1[/LOW unattended_package/]
+  C1 & H1 & H2 & C2 & C3 & H3 & M1 & M2 & L1 --> AM{AlertManager:<br/>same dedup key? within cooldown<br/>and not an escalation?}
+  AM -- yes --> X([suppressed])
+  AM -- no --> E([emit alert + recommendation<br/>to sinks, index, memory])

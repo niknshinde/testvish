@@ -107,23 +107,27 @@ SYNONYMS: dict[str, list[str]] = {
     "car": ["vehicle", "sedan"], "sedan": ["car", "vehicle"], "van": ["vehicle", "delivery"],
     "suv": ["vehicle", "car"], "vehicle": ["car", "truck", "van"], "motorcycle": ["vehicle", "bike"],
     "person": ["people", "human", "someone"], "man": ["person"], "woman": ["person"], "people": ["person"],
-    "intruder": ["person", "trespasser", "climbing", "breach"], "trespasser": ["intruder", "person"],
+    "intruder": ["person", "trespasser", "climbing", "breach", "suspicious", "tampering"], "trespasser": ["intruder", "person"],
     "courier": ["delivery", "person"], "delivery": ["courier", "package", "van"],
     "package": ["parcel", "box", "delivery"], "parcel": ["package"],
     "loitering": ["lingering", "standing", "waiting", "suspicious"], "lingering": ["loitering"],
     "climbing": ["breach", "fence", "intruder"], "breach": ["climbing", "intrusion"],
     "deer": ["animal", "wildlife"], "fox": ["animal", "wildlife"], "dog": ["animal", "pet"],
-    "cat": ["animal", "pet"], "animal": ["wildlife"], "crowbar": ["tool", "weapon", "suspicious"],
+    "cat": ["animal", "pet"], "animal": ["wildlife"], "crowbar": ["tool", "weapon", "suspicious"], "tool": ["crowbar", "ladder", "cutters", "suspicious"],
     "night": ["midnight", "dark"], "midnight": ["night"], "gate": ["entrance"], "entrance": ["gate"],
 }
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)?")
+STOPWORDS = frozenset("""a an the at on in of to by for from with and or is are was were be been it its this that
+near into onto over under show me all any some what which who when where did do does there their""".split())
 
 
 def _tokens(text: str) -> list[str]:
     toks = []
     for t in _TOKEN_RE.findall(text.lower()):
         t = t.replace("-", "")
+        if t in STOPWORDS:
+            continue
         if len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
             t = t[:-1]
         toks.append(t)
@@ -178,7 +182,7 @@ class FrameIndex:
         self._pending: dict[str, list[tuple]] = {k: [] for k in
                                                  ("frames", "fts", "det", "logs", "alerts", "tel", "emb")}
         self._pending_text: list[tuple[int, str]] = []
-        self._vec_cache: tuple[np.ndarray, np.ndarray] | None = None
+        self._vec_cache: tuple[np.ndarray, np.ndarray, np.ndarray] | None = None
 
     # ---- writes ---------------------------------------------------------
     def add_frame(self, frame: Frame, detections: Iterable[Detection] = ()) -> None:
@@ -348,35 +352,43 @@ class FrameIndex:
                 "first": q("SELECT MIN(ts) FROM frames"), "last": q("SELECT MAX(ts) FROM frames")}
 
     # ---- text / vector search -------------------------------------------
-    def search_text(self, query: str, limit: int = 20) -> list[dict[str, Any]]:
-        toks = [t for t in re.findall(r"[A-Za-z0-9]+", query) if len(t) > 1]
+    def search_text(self, query: str, limit: int = 20, events_only: bool = False) -> list[dict[str, Any]]:
+        toks = [t for t in re.findall(r"[A-Za-z0-9]+", query) if len(t) > 1 and t.lower() not in STOPWORDS]
         if not toks:
             return []
         sql = ("SELECT f.*, bm25(frames_fts) AS score FROM frames_fts JOIN frames f ON f.frame_id = frames_fts.frame_id "
-               "WHERE frames_fts MATCH ? ORDER BY score LIMIT ?")
+               "WHERE frames_fts MATCH ?" + (" AND f.labels != ''" if events_only else "")
+               + " ORDER BY score LIMIT ?")
         rows = list(self.conn.execute(sql, (" ".join(f'"{t}"' for t in toks), limit)))   # AND
-        if not rows and len(toks) > 1:
-            rows = list(self.conn.execute(sql, (" OR ".join(f'"{t}"' for t in toks), limit)))
+        if not rows:
+            # relax to OR, expanded with domain synonyms ("intruder" -> person, climbing, ...)
+            expanded = list(dict.fromkeys(toks + [syn for t in toks for syn in SYNONYMS.get(t.lower(), [])]))
+            rows = list(self.conn.execute(sql, (" OR ".join(f'"{t}"' for t in expanded), limit)))
         return [dict(r) for r in rows]
 
-    def _vectors(self) -> tuple[np.ndarray, np.ndarray]:
+    def _vectors(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         if self._vec_cache is None:
-            rows = self.conn.execute("SELECT frame_id, vec FROM embeddings ORDER BY frame_id").fetchall()
+            rows = self.conn.execute("SELECT e.frame_id, e.vec, COALESCE(f.labels, '') != '' FROM embeddings e "
+                                     "JOIN frames f USING(frame_id) ORDER BY e.frame_id").fetchall()
             if not rows:
-                self._vec_cache = (np.zeros(0, dtype=np.int64), np.zeros((0, self.embedder.dim), dtype=np.float32))
+                self._vec_cache = (np.zeros(0, dtype=np.int64), np.zeros((0, self.embedder.dim), dtype=np.float32),
+                                   np.zeros(0, dtype=bool))
             else:
                 ids = np.array([r[0] for r in rows], dtype=np.int64)
                 mat = np.frombuffer(b"".join(r[1] for r in rows), dtype=np.float32).reshape(len(rows), -1)
-                self._vec_cache = (ids, mat)
+                self._vec_cache = (ids, mat, np.array([bool(r[2]) for r in rows]))
         return self._vec_cache
 
-    def semantic_search(self, query: str, limit: int = 20, min_score: float = 0.05) -> list[dict[str, Any]]:
+    def semantic_search(self, query: str, limit: int = 20, min_score: float = 0.05,
+                        events_only: bool = False) -> list[dict[str, Any]]:
         self.flush()
-        ids, mat = self._vectors()
+        ids, mat, has_event = self._vectors()
         if not len(ids):
             return []
         q = self.embedder.embed([query])[0]
         scores = mat @ q
+        if events_only:
+            scores = np.where(has_event, scores, -1.0)
         top = np.argsort(-scores)[:limit]
         out = []
         for i in top:
@@ -389,13 +401,24 @@ class FrameIndex:
         return out
 
     def hybrid_search(self, query: str, limit: int = 10, k: int = 60) -> list[dict[str, Any]]:
-        """Reciprocal Rank Fusion of BM25 (keywords) and vector similarity (synonyms/paraphrase)."""
+        """Reciprocal Rank Fusion of BM25 (keywords) and vector similarity (synonyms/paraphrase).
+        Frames with detections are ranked before empty patrol frames."""
         self.flush()
-        fused: dict[int, float] = {}
-        rows: dict[int, dict] = {}
-        for ranked in (self.search_text(query, limit * 3), self.semantic_search(query, limit * 3)):
-            for rank, r in enumerate(ranked):
-                fused[r["frame_id"]] = fused.get(r["frame_id"], 0.0) + 1.0 / (k + rank + 1)
-                rows.setdefault(r["frame_id"], r)
-        best = sorted(fused, key=lambda f: -fused[f])[:limit]
-        return [{**rows[f], "rrf": round(fused[f], 5)} for f in best]
+        out: list[dict[str, Any]] = []
+        # Event prior: rank frames where something was detected first, then fill with empty patrol frames
+        # (hundreds of identical "Tool shed door closed" frames would otherwise drown the one real event).
+        for events_only in (True, False):
+            fused: dict[int, float] = {}
+            rows: dict[int, dict] = {}
+            for ranked in (self.search_text(query, limit * 3, events_only=events_only),
+                           self.semantic_search(query, limit * 3, events_only=events_only)):
+                for rank, r in enumerate(ranked):
+                    fused[r["frame_id"]] = fused.get(r["frame_id"], 0.0) + 1.0 / (k + rank + 1)
+                    rows.setdefault(r["frame_id"], r)
+            seen = {r["frame_id"] for r in out}
+            for f in sorted(fused, key=lambda f: -fused[f]):
+                if len(out) >= limit:
+                    return out
+                if f not in seen:
+                    out.append({**rows[f], "rrf": round(fused[f], 5)})
+        return out

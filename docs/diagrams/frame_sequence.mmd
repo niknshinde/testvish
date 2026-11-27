@@ -1,0 +1,24 @@
+sequenceDiagram
+  autonumber
+  participant D as Drone (camera + telemetry)
+  participant P as SecurityPipeline
+  participant A as FrameAnalyzer
+  participant T as EntityTracker
+  participant R as Rules
+  participant M as AlertManager
+  participant I as FrameIndex
+  participant C as SecurityMemory
+  D->>P: Telemetry(ts, lat, lon, alt, battery, wind)
+  P->>R: safety checks
+  R-->>M: AlertCandidate? (e.g. battery 13%)
+  D->>P: Frame 723 · 12:00 · "Blue Ford F150 at garage"
+  P->>A: analyze(frame)
+  A-->>P: [Detection(vehicle, blue, Ford, F150, truck, zone=garage)]
+  P->>T: update(detection)
+  T-->>P: entity vehicle-002, visit 2, dwell, zone_changed
+  P->>P: log "Blue Ford F150 spotted at garage, 12:00."
+  P->>R: evaluate(detection, track update)
+  R-->>M: candidates (repeat_vehicle on new visit)
+  M-->>P: Alert (after dedup / cooldown / escalation)
+  P->>I: add_frame + detections + logs + alerts (batched)
+  P->>C: observe_frame (hourly episode, recent logs, alerts)

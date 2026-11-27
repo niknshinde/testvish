@@ -1,0 +1,168 @@
+
+== 1. Simulated input (telemetry + frame descriptions) ===================
+4318 records: 1442 frames, 2876 telemetry samples. Examples:
+  Frame 1 | Time 00:00:00 | Location main gate | alt 35.0 m | batt 100.0% | "Person in dark hoodie standing near main gate"
+  Frame 2 | Time 00:00:20 | Location main gate | alt 35.0 m | batt 99.5% | "Person in dark hoodie at main gate, looking around"
+  Frame 514 | Time 08:31:00 | Location main gate | alt 33.5 m | batt 53.5% | "Blue Ford F150 pickup truck entering through main gate"
+  Frame 723 | Time 12:00:00 | Location garage | alt 35.0 m | batt 100.0% | "Blue Ford F150 at garage"
+  Frame 1372 | Time 22:49:00 | Location perimeter fence | alt 31.3 m | batt 67.0% | "Person in black jacket climbing perimeter fence carrying a crowbar"
+
+== 2. Real-time processing: logs + alerts ================================
+[LOG] Person (dark hoodie) standing at main gate, 00:00.
+[ALERT:HIGH] Person detected at main gate during night hours, 00:00.
+[LOG] Person (dark hoodie) lingering at main gate, 00:00.
+[ALERT:HIGH] Person loitering at main gate, 00:01.
+[LOG] Person (dark hoodie) spotted at parking lot, 00:03.
+[LOG] Bird spotted at backyard, 01:52.
+[LOG] Fox moving at backyard, 02:17.
+[LOG] Cat moving at perimeter fence, 05:49.
+[LOG] Person (orange jacket) running at parking lot, 06:10.
+[LOG] Bird spotted at backyard, 07:03.
+[LOG] White Tesla Model 3 leaving from garage, 07:42 [authorised].
+[LOG] White Tesla Model 3 spotted at main gate, 07:43 [authorised].
+[LOG] Squirrel spotted at tool shed, 08:10.
+[LOG] Blue Ford F150 entering at main gate, 08:31.
+[LOG] Blue Ford F150 parked at driveway, 08:33.
+[LOG] Person (grey jacket) spotted at driveway, 08:33.
+[LOG] Person (grey jacket) spotted at front porch, 08:36.
+[LOG] Blue Ford F150 leaving from main gate, 08:41.
+[LOG] Cat moving at perimeter fence, 08:54.
+[LOG] Squirrel spotted at tool shed, 09:13.
+[LOG] Green van parked at driveway, 10:05 [authorised].
+[LOG] Person (green uniform) moving at backyard, 10:05.
+[LOG] White van entering at main gate, 11:20.
+[LOG] Person (yellow vest) spotted at front porch, 11:22.
+[LOG] Package left at front porch, 11:22.
+[LOG] White van leaving from main gate, 11:24.
+[LOG] Blue Ford F150 entering at main gate, 11:58 (2nd visit today).
+[ALERT:MEDIUM] Blue Ford F150 entered twice today, 11:58.
+[LOG] Blue Ford F150 spotted at garage, 12:00.
+[ALERT:LOW] Package left unattended at front porch for 40m 00s, 12:02.
+[LOG] Person (grey jacket) tampering at garage, 12:04.
+[ALERT:CRITICAL] Perimeter breach: person tampering at garage, 12:04.
+[LOG] Blue Ford F150 leaving from main gate, 12:06.
+[ALERT:MEDIUM] Telemetry gap of 150s ended, 13:02.
+[LOG] Person (group of 2) moving at parking lot, 14:10.
+[LOG] Dog spotted at parking lot, 14:10.
+[LOG] Bird spotted at backyard, 15:03.
+[LOG] Squirrel spotted at tool shed, 15:11.
+[ALERT:MEDIUM] High wind 14 m/s, 15:20.
+[ALERT:HIGH] Drone outside property geofence (40.00210, -75.00008), 16:45.
+[LOG] Squirrel spotted at tool shed, 18:10.
+[LOG] Cat moving at perimeter fence, 18:16.
+[LOG] Red Toyota Camry parked at parking lot, 18:20.
+[ALERT:MEDIUM] Unrecognised Red Toyota Camry parked at parking lot for 16m 00s, 18:36.
+[LOG] Red Toyota Camry leaving from parking lot, 18:44.
+[LOG] Squirrel spotted at tool shed, 18:46.
+[ALERT:MEDIUM] Drone battery low (22%), 19:38.
+[ALERT:CRITICAL] Drone battery critical (13%), 19:46.
+[LOG] Cat moving at perimeter fence, 20:22.
+[LOG] Raccoon spotted at tool shed, 21:15.
+[LOG] Squirrel spotted at tool shed, 21:53.
+[LOG] Person (black jacket, flashlight) moving at perimeter fence, 22:47.
+[ALERT:HIGH] Person in restricted zone perimeter fence after hours, 22:47.
+[LOG] Person (black jacket, crowbar) climbing at perimeter fence, 22:49.
+[ALERT:CRITICAL] Perimeter breach: person climbing at perimeter fence, 22:49.
+[ALERT:CRITICAL] Person with crowbar at perimeter fence, 22:49.
+[LOG] Person (black jacket) running at backyard, 22:51.
+[LOG] Person (black jacket, crowbar) tampering at tool shed, 23:05.
+[ALERT:CRITICAL] Person detected at tool shed during night hours, 23:05.
+[ALERT:CRITICAL] Perimeter breach: person tampering at tool shed, 23:05.
+[LOG] Person (black jacket) climbing at perimeter fence, 23:08.
+[LOG] Deer spotted at backyard, 23:40.
+
+== Run complete ==========================================================
+1442 frames, 2876 telemetry samples, 54 detections, 46 log lines, 16 alerts (42 duplicates suppressed) in 0.22s
+
+== Video summary =========================================================
+On 26 Nov 2026 the drone analysed 1,442 frames and saw 6 vehicle visits, 7 people and 17 animals, raising 16 alerts (6 critical) - most serious: perimeter breach: person climbing at perimeter fence, 22:49; the unrecognised Blue Ford F150 visited 2 times (08:31, 11:58).
+
+== Agent recommendations =================================================
+ - Treat as a suspect vehicle: Perimeter breach: person tampering at garage, 12:04 happened during visit 2 of the Blue Ford F150 (11:58-12:06); the vehicle's occupant is the likely subject. Share plate/footage with security and add it to the watch-list.
+ - [CRITICAL] 12:04 Perimeter breach: person tampering at garage, 12:04. -> Trigger siren, track subject with the drone, call security/emergency services and preserve the clip as evidence.
+ - [CRITICAL] 19:46 Drone battery critical (13%), 19:46. -> Abort patrol and land at dock immediately.
+ - [CRITICAL] 22:49 Person with crowbar at perimeter fence, 22:49. -> Treat as potential intrusion: notify security immediately and keep the subject in frame.
+ - [CRITICAL] 23:05 Person detected at tool shed during night hours, 23:05. -> Investigate: fly to subject, record continuously and notify the owner; escalate to security/police if not identified.
+ - [HIGH] 00:01 Person loitering at main gate, 00:01. -> Hold position over main gate, switch on spotlight and two-way speaker warning; notify the owner with the live clip.
+ - [HIGH] 16:45 Drone outside property geofence (40.00210, -75.00008), 16:45. -> Return inside the geofence; check GPS / wind drift.
+ - [HIGH] 22:47 Person in restricted zone perimeter fence after hours, 22:47. -> Verify identity via two-way speaker; notify owner.
+ - [MEDIUM] 11:58 Blue Ford F150 entered twice today, 11:58. -> Check against expected visitors/deliveries; capture the plate on this visit and add to the watch-list if unknown.
+ - [MEDIUM] 13:02 Telemetry gap of 150s ended, 13:02. -> Check datalink; footage during the gap may be missing.
+
+== 3. Frame index queries ================================================
+> show all truck events
+  08:31 frame#514 Blue Ford F150 entering at main gate
+  08:33 frame#516 Blue Ford F150 parked at driveway
+  08:41 frame#524 Blue Ford F150 exiting at main gate
+  11:58 frame#721 Blue Ford F150 entering at main gate
+  12:00 frame#723 Blue Ford F150 seen at garage
+  12:06 frame#729 Blue Ford F150 exiting at main gate
+> frames between 00:00 and 00:02
+  00:00:00 frame#1 [main gate] Person in dark hoodie standing near main gate
+  00:00:20 frame#2 [main gate] Person in dark hoodie at main gate, looking around
+  00:00:40 frame#3 [main gate] Person in dark hoodie still at main gate, peering through the bars
+  00:01:00 frame#4 [main gate] Person in dark hoodie pacing at main gate
+  00:01:40 frame#5 [main gate] Person in dark hoodie still near main gate
+> hybrid search "intruder with a tool"
+  22:49 frame#1372 [perimeter fence] Person in black jacket climbing perimeter fence carrying a crowbar
+  23:05 frame#1388 [tool shed] Person in black jacket prying the tool shed door with a crowbar
+  23:08 frame#1391 [perimeter fence] Person in black jacket climbing over the east wall, fleeing
+  22:51 frame#1374 [backyard] Person in black jacket running across backyard toward tool shed
+
+== 4. Agent Q&A (follow-up questions) ====================================
+(agent: OfflineSecurityAgent)
+
+Q: What objects were in the video?
+person (person): 6 distinct, 17 detections
+squirrel (animal): 6 distinct, 6 detections
+sedan (vehicle): 2 distinct, 6 detections
+truck (vehicle): 1 distinct, 6 detections
+cat (animal): 4 distinct, 4 detections
+package (package): 1 distinct, 4 detections
+bird (animal): 3 distinct, 3 detections
+van (vehicle): 2 distinct, 3 detections
+deer (animal): 1 distinct, 1 detections
+dog (animal): 1 distinct, 1 detections
+fox (animal): 1 distinct, 1 detections
+raccoon (animal): 1 distinct, 1 detections
+courier (person): 1 distinct, 1 detections
+Entities: person-001: Person (dark hoodie); animal-001: Bird; animal-002: Fox; animal-003: Cat; person-002: Person (orange jacket); animal-004: Bird; vehicle-001: White Tesla Model 3; animal-005: Squirrel; vehicle-002: Blue Ford F150; person-003: Person (grey jacket); animal-006: Cat; animal-007: Squirrel; vehicle-003: Green van; person-004: Person (green uniform); vehicle-004: White van; person-005: Person (yellow vest); package-001: Package; person-006: Person (group of 2); animal-008: Dog; animal-009: Bird; animal-010: Squirrel; animal-011: Squirrel; animal-012: Cat; vehicle-005: Red Toyota Camry; animal-013: Squirrel; animal-014: Cat; animal-015: Raccoon; animal-016: Squirrel; person-007: Person (black jacket, flashlight); animal-017: Deer
+
+Q: How many times did the blue Ford F150 visit today?
+vehicle-002: Blue Ford F150 - 2 visit(s) at 08:31, 11:58; zones: driveway, garage, main gate
+  visit 1: 08:31-08:41, zones main gate, driveway, frames [514, 516, 524]
+  visit 2: 11:58-12:06, zones main gate, garage, frames [721, 723, 729]
+
+Q: When did it leave?
+08:41 frame#524 Blue Ford F150 (vehicle/truck) exiting at main gate [vehicle-002]
+12:06 frame#729 Blue Ford F150 (vehicle/truck) exiting at main gate [vehicle-002]
+
+Q: What happened around midnight?
+00:00 frame#1 Person (dark hoodie) (person/person) standing at main gate [person-001]
+00:00 frame#2 Person (dark hoodie) (person/person) loitering at main gate [person-001]
+00:00 frame#3 Person (dark hoodie) (person/person) loitering at main gate [person-001]
+00:01 frame#4 Person (dark hoodie) (person/person) loitering at main gate [person-001]
+00:01 frame#5 Person (dark hoodie) (person/person) loitering at main gate [person-001]
+00:03 frame#6 Person (dark hoodie) (person/person) walking at parking lot [person-001]
+Alerts:
+00:00 HIGH Person detected at main gate during night hours, 00:00.
+00:01 HIGH Person loitering at main gate, 00:01.
+
+Q: Any critical alerts after 22:00?
+A0013 22:49 CRITICAL [perimeter_breach] Perimeter breach: person climbing at perimeter fence, 22:49. Details: Source: 'Person in black jacket climbing perimeter fence carrying a crowbar'. Recommended: Trigger siren, track subject with the drone, call security/emergency services and preserve the clip as evidence.
+A0014 22:49 CRITICAL [suspicious_object] Person with crowbar at perimeter fence, 22:49. Details: Source: 'Person in black jacket climbing perimeter fence carrying a crowbar'. Recommended: Treat as potential intrusion: notify security immediately and keep the subject in frame.
+A0015 23:05 CRITICAL [night_activity] Person detected at tool shed during night hours, 23:05. Details: Person (black jacket, flashlight) seen at restricted zone 'tool shed' at 23:05:00 (night window 23:00-05:00). Recommended: Investigate: fly to subject, record continuously and notify the owner; escalate to security/police if not identified.
+A0016 23:05 CRITICAL [perimeter_breach] Perimeter breach: person tampering at tool shed, 23:05. Details: Source: 'Person in black jacket prying the tool shed door with a crowbar'. Recommended: Trigger siren, track subject with the drone, call security/emergency services and preserve the clip as evidence.
+
+Q: What should I do next?
+Recommended actions:
+- Treat as a suspect vehicle: Perimeter breach: person tampering at garage, 12:04 happened during visit 2 of the Blue Ford F150 (11:58-12:06); the vehicle's occupant is the likely subject. Share plate/footage with security and add it to the watch-list.
+- [CRITICAL] 12:04 Perimeter breach: person tampering at garage, 12:04. -> Trigger siren, track subject with the drone, call security/emergency services and preserve the clip as evidence.
+- [CRITICAL] 19:46 Drone battery critical (13%), 19:46. -> Abort patrol and land at dock immediately.
+- [CRITICAL] 22:49 Person with crowbar at perimeter fence, 22:49. -> Treat as potential intrusion: notify security immediately and keep the subject in frame.
+- [CRITICAL] 23:05 Person detected at tool shed during night hours, 23:05. -> Investigate: fly to subject, record continuously and notify the owner; escalate to security/police if not identified.
+- [HIGH] 00:01 Person loitering at main gate, 00:01. -> Hold position over main gate, switch on spotlight and two-way speaker warning; notify the owner with the live clip.
+- [HIGH] 16:45 Drone outside property geofence (40.00210, -75.00008), 16:45. -> Return inside the geofence; check GPS / wind drift.
+- [HIGH] 22:47 Person in restricted zone perimeter fence after hours, 22:47. -> Verify identity via two-way speaker; notify owner.
+- [MEDIUM] 11:58 Blue Ford F150 entered twice today, 11:58. -> Check against expected visitors/deliveries; capture the plate on this visit and add to the watch-list if unknown.
+- [MEDIUM] 13:02 Telemetry gap of 150s ended, 13:02. -> Check datalink; footage during the gap may be missing.

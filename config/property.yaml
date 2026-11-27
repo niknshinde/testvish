@@ -1,0 +1,86 @@
+# Property / site configuration for the Drone Security Analyst Agent.
+# Everything site-specific lives here so the same agent can be deployed to a
+# different property by editing YAML, not code.
+
+property:
+  name: "Demo Residence"
+  timezone: "local"
+  # Rectangular geofence the drone must stay inside (lat/lon, degrees)
+  geofence:
+    min_lat: 40.00000
+    max_lat: 40.00180
+    min_lon: -75.00250
+    max_lon: -75.00000
+  dock: {lat: 40.00090, lon: -75.00125}
+
+zones:
+  # name: canonical zone name used in logs and the index
+  # aliases: words that map a free-text description to this zone
+  # restricted: people here are always suspicious outside business hours
+  - name: main gate
+    aliases: ["main gate", "front gate", "gate", "entrance"]
+    restricted: false
+    center: {lat: 40.00010, lon: -75.00125}
+  - name: driveway
+    aliases: ["driveway", "drive way"]
+    restricted: false
+    center: {lat: 40.00050, lon: -75.00125}
+  - name: garage
+    aliases: ["garage", "carport"]
+    restricted: true
+    center: {lat: 40.00090, lon: -75.00060}
+  - name: front porch
+    aliases: ["front porch", "porch", "front door", "doorstep"]
+    restricted: false
+    center: {lat: 40.00080, lon: -75.00125}
+  - name: backyard
+    aliases: ["backyard", "back yard", "garden", "lawn", "pool"]
+    restricted: true
+    center: {lat: 40.00150, lon: -75.00125}
+  - name: perimeter fence
+    aliases: ["perimeter fence", "fence", "east wall", "west wall", "boundary wall", "perimeter"]
+    restricted: true
+    center: {lat: 40.00120, lon: -75.00010}
+  - name: tool shed
+    aliases: ["tool shed", "shed", "warehouse", "storage"]
+    restricted: true
+    center: {lat: 40.00160, lon: -75.00220}
+  - name: parking lot
+    aliases: ["parking lot", "parking", "visitor parking", "street"]
+    restricted: false
+    center: {lat: 40.00005, lon: -75.00200}
+
+schedule:
+  night_start: "23:00"     # inclusive
+  night_end: "05:00"       # exclusive
+  business_start: "07:00"
+  business_end: "20:00"
+
+# Vehicles that belong to the household / are expected. Matching is by plate
+# when available, otherwise by (color, make, model).
+authorized_vehicles:
+  - {label: "Owner's car", color: white, make: Tesla, model: "Model 3", plate: "OWN-001"}
+  - {label: "Gardener's van", color: green, category: van, plate: "GRD-452"}
+
+rules:
+  loitering:          {enabled: true, min_dwell_s: 60, severity: high}
+  night_activity:     {enabled: true, severity: high, restricted_severity: critical}
+  perimeter_breach:   {enabled: true, severity: critical}
+  suspicious_object:  {enabled: true, severity: critical}
+  restricted_zone:    {enabled: true, severity: high}
+  repeat_vehicle:     {enabled: true, min_visits: 2, severity: medium}
+  vehicle_dwell:      {enabled: true, min_dwell_s: 900, severity: medium}
+  unattended_package: {enabled: true, min_dwell_s: 1800, severity: low}
+  low_battery:        {enabled: true, warn_pct: 25, critical_pct: 15}
+  altitude:           {enabled: true, min_m: 5, max_m: 120, severity: high}
+  geofence:           {enabled: true, severity: high}
+  high_wind:          {enabled: true, max_mps: 12, severity: medium}
+  telemetry_gap:      {enabled: true, max_gap_s: 30, severity: medium}
+
+alerting:
+  cooldown_s: 600          # identical (rule, entity/zone) alerts are suppressed for this long
+  jsonl_path: null         # e.g. out/alerts.jsonl
+
+tracking:
+  visit_gap_s: 900         # an entity unseen for this long starts a new "visit"
+  person_reid_window_s: 600

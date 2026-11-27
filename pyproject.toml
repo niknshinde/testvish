@@ -1,0 +1,21 @@
+[project]
+name = "drone-security-analyst"
+version = "0.1.0"
+description = "Prototype Drone Security Analyst Agent: telemetry + video-frame analysis, real-time alerts, frame indexing and a Q&A agent."
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0", "numpy>=1.26"]
+
+[project.optional-dependencies]
+llm = ["anthropic>=0.70", "langchain>=1.0", "langchain-anthropic>=1.0", "langchain-core>=1.0"]
+video = ["opencv-python>=4.9"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+drone-security = "drone_security.cli:main"
+
+[tool.setuptools]
+packages = ["drone_security"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: scalability benchmarks (deselect with -m 'not slow')"]
